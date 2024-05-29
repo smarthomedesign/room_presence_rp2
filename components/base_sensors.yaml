@@ -89,7 +89,7 @@ sensor:
     entity_category: "diagnostic"
   
   - platform: template
-    name: ${Room} Uptime
+    name: ${room} Uptime
     id: room_uptime
     icon: "mdi:timer-outline"
     entity_category: diagnostic
@@ -195,4 +195,3 @@ number:
     restore_value: true
     unit_of_measurement: "lx"
     # mode: slider
-
