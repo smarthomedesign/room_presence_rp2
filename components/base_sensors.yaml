@@ -101,10 +101,6 @@ sensor:
     update_interval: 1s
     on_raw_value:
       then:
-        # - logger.log:
-        #     format: "Raw Value of Uptime sensor: %f"
-        #     args: ['id(${node_name}_uptime_raw).raw_state']
-        #     level: INFO
         - text_sensor.template.publish:
             id: room_uptime
             state: !lambda |-
