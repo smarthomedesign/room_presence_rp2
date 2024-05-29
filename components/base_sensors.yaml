@@ -89,13 +89,13 @@ sensor:
     entity_category: "diagnostic"
   
   - platform: template
-    name: ${room} Uptime
+    name: ${Room} Uptime
     id: room_uptime
     icon: "mdi:timer-outline"
     entity_category: diagnostic
 
   - platform: uptime
-    name: uptime
+    name: uptime_sensor
     id: uptime_sensor
     internal: true
     update_interval: 1s
