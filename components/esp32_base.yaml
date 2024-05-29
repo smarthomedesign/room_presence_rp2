@@ -1,0 +1,71 @@
+esphome:
+  name: "${name}"
+  name_add_mac_suffix: true
+  project:
+    name: "${project_name}"
+    version: "${project_version}"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino 
+
+logger:
+  level: "${log_level}"
+
+ota:
+  
+api:
+  reboot_timeout: 5min
+
+wifi:
+  passive_scan: true
+  reboot_timeout: 1min
+  ap:
+    ap_timeout: 2min
+
+improv_serial:
+
+esp32_improv:
+  authorizer: none
+
+captive_portal:
+
+i2c:
+  - id: bus_a
+    scl: 18
+    sda: 19
+    scan: true
+
+uart:
+  id: UART_BUS
+  rx_pin: GPIO23
+  tx_pin: GPIO22
+  baud_rate: 115200
+  data_bits: 8
+  stop_bits: 1
+  parity: NONE
+
+light:
+  - platform: status_led
+    name: "ESP32 Status LED"
+    pin:
+      number: GPIO32
+      inverted: true
+      mode:
+        output: true
+        pullup: false
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_OFF
+
+button:
+  - platform: restart
+    name: Restart_internal
+    id: restart_internal
+    entity_category: config 
+    internal: true
+  
+  - platform: safe_mode
+    internal: false
+    name: $room Safe Mode
+    entity_category: config

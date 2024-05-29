@@ -1,0 +1,198 @@
+# DEFAULT SENSORS: co2 / temperature / humidity / Illuminace
+sensor:
+# co2, temperature and humidity
+  - platform: scd4x
+    co2:
+      name: "${room} CO2"
+      accuracy_decimals: 0
+      filters:
+      - lambda: return x + id(co2_offset).state;
+    temperature:
+      name: "${room} Temperature"
+      filters:
+      - lambda: return x + id(temperature_offset).state;
+    humidity:
+      name: "${room} Humidity"
+      filters:
+      - lambda: return x + id(humidity_offset).state;
+    update_interval: ${temperature_update_interval}
+    measurement_mode: periodic
+    automatic_self_calibration: True
+    i2c_id: bus_a
+    address: 0x62 
+ 
+  # Illuminace sensor
+  - platform: bh1750
+    name: "${room} Illuminance"
+    id: "${room}_illuminance"
+    icon: mdi:white-balance-sunny
+    update_interval: ${illuminance_update_interval}
+    i2c_id: bus_a
+    address: 0x23
+    filters:
+      - calibrate_linear:
+          method: exact
+          datapoints:
+            - 0.3 -> 0.3
+            - 0.9 -> 1.7
+            - 1.2 -> 3.6
+            - 3.2 -> 6.9
+            - 5.1 -> 10.2
+            - 6.8 -> 27.1
+            - 7.0 -> 13.5
+            - 7.4 -> 28.2
+            - 8.7 -> 21.7
+            - 8.9 -> 17.1
+            - 10.9 -> 20.4
+            - 12.8 -> 23.5
+            - 14.5 -> 31.2
+            - 14.9 -> 26.7
+            - 16.8 -> 41.1
+            - 16.9 -> 30.2
+            - 18.8 -> 33.4
+            - 19.1 -> 35.8
+            - 20.7 -> 37.0
+            - 24.3 -> 60.3
+            - 26.1 -> 68.6
+            - 26.7 -> 83.8
+            - 30.2 -> 75.9
+            - 32.6 -> 80.3
+            - 34.6 -> 83.2
+            - 40.4 -> 99.9
+            - 48.0 -> 183.7
+            - 48.3 -> 119.2
+            - 55.5 -> 141.3
+            - 55.8 -> 137.9
+            - 63.8 -> 157.6
+            - 71.5 -> 176.9
+            - 79.8 -> 197.1
+            - 84.3 -> 205.7 
+      - lambda: return x + id(illuminance_offset).state;
+      - clamp:
+          min_value: 0
+
+  # Reports the WiFi signal strength/RSSI in dB
+  - platform: wifi_signal 
+    # name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+    internal: true
+  # Reports the WiFi signal strength in %
+  - platform: copy 
+    source_id: wifi_signal_db
+    name: "${room} WiFi"
+    id: "${room}_WiFi"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+  
+  - platform: template
+    name: ${room} Uptime
+    id: room_uptime
+    icon: "mdi:timer-outline"
+    entity_category: diagnostic
+
+  - platform: uptime
+    name: uptime
+    id: uptime_sensor
+    internal: true
+    update_interval: 1s
+    on_raw_value:
+      then:
+        # - logger.log:
+        #     format: "Raw Value of Uptime sensor: %f"
+        #     args: ['id(${node_name}_uptime_raw).raw_state']
+        #     level: INFO
+        - text_sensor.template.publish:
+            id: controller_uptime
+            state: !lambda |-
+              int seconds = round(id(uptime_sensor).raw_state);
+              int days = seconds / (24 * 3600);
+              seconds = seconds % (24 * 3600);
+              int hours = seconds / 3600;
+              seconds = seconds % 3600;
+              int minutes = seconds /  60;
+              seconds = seconds % 60;
+              if ( days ) {
+                return { (String(days) +"d " + String(hours) +"h " + String(minutes) +"m "+ String(seconds) +"s").c_str() };
+              } else if ( hours ) {
+                return { (String(hours) +"h " + String(minutes) +"m "+ String(seconds) +"s").c_str() };
+              } else if ( minutes ) {
+                return { (String(minutes) +"m "+ String(seconds) +"s").c_str() };
+              } else {
+                return { (String(seconds) +"s").c_str() };
+              }
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: ${room} IP Address
+      icon: mdi:ip-network
+
+binary_sensor:
+  # status sensor
+  - platform: status
+    id: device_status
+    name: "${room} Status"
+    entity_category: "diagnostic"
+
+number:
+  # temperature_offset
+  - platform: template
+    name: ${room} Temperature offset
+    id: temperature_offset
+    icon: mdi:thermometer
+    entity_category: config
+    min_value: -50.0
+    max_value: 50.0
+    initial_value: 0
+    optimistic: true
+    step: 0.1
+    restore_value: true
+    unit_of_measurement: "°C"
+    # mode: slider
+  # co2_offset
+  - platform: template
+    name: ${room} CO2 offset
+    id: co2_offset
+    icon: mdi:molecule-co2
+    entity_category: config
+    min_value: -500.0
+    max_value: 500.0
+    initial_value: 0
+    optimistic: true
+    step: 0.1
+    restore_value: true
+    unit_of_measurement: "ppm"
+    # mode: slider
+  # humidity_offset
+  - platform: template
+    name: ${room} Humidity offset
+    id: humidity_offset
+    icon: mdi:water-percent
+    entity_category: config
+    min_value: -50.0
+    max_value: 50.0
+    initial_value: 0
+    optimistic: true
+    step: 0.1
+    restore_value: true
+    unit_of_measurement: "%"
+    # mode: slider
+  # illuminance_offset
+  - platform: template
+    name: ${room} Illuminance offset
+    id: illuminance_offset
+    icon: mdi:white-balance-sunny
+    entity_category: config
+    min_value: -50.0
+    max_value: 50.0
+    initial_value: 0
+    optimistic: true
+    step: 0.1
+    restore_value: true
+    unit_of_measurement: "lx"
+    # mode: slider
+

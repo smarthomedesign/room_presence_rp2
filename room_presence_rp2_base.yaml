@@ -1,0 +1,23 @@
+substitutions:
+  # name for ESP Home
+  name: "shd-room-presence-rp2"
+  friendly_name: "SHD RoomPresence RP2-L"
+  project_name: "SmartHomeDesign.RoomPresence-RP2-L"
+  project_version: "3.0.1"
+  
+  room: "Room" # replace this with your room name
+
+  temperature_update_interval: "30s"
+  illuminance_update_interval: "30s"
+  occupancy_delay_off: "60s"
+
+  log_level: 'DEBUG'
+
+dashboard_import:
+  package_import_url: github://smarthomedesign/room_presence/room_presence_rp2_base.yaml@main
+  import_full_config: false
+
+packages:
+  base: !include components/esp32_base.yaml
+  base_sensors: !include components/base_sensors.yaml
+  device_version: !include components/ld1125h.yaml
