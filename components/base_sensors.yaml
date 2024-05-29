@@ -106,7 +106,7 @@ sensor:
         #     args: ['id(${node_name}_uptime_raw).raw_state']
         #     level: INFO
         - text_sensor.template.publish:
-            id: controller_uptime
+            id: room_uptime
             state: !lambda |-
               int seconds = round(id(uptime_sensor).raw_state);
               int days = seconds / (24 * 3600);
