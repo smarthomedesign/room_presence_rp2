@@ -88,12 +88,6 @@ sensor:
     unit_of_measurement: "Signal %"
     entity_category: "diagnostic"
   
-  - platform: template
-    name: ${room} Uptime
-    id: room_uptime
-    icon: "mdi:timer-outline"
-    entity_category: diagnostic
-
   - platform: uptime
     name: uptime_sensor
     id: uptime_sensor
@@ -101,6 +95,10 @@ sensor:
     update_interval: 1s
     on_raw_value:
       then:
+        # - logger.log:
+        #     format: "Raw Value of Uptime sensor: %f"
+        #     args: ['id(${node_name}_uptime_raw).raw_state']
+        #     level: INFO
         - text_sensor.template.publish:
             id: room_uptime
             state: !lambda |-
@@ -126,7 +124,12 @@ text_sensor:
     ip_address:
       name: ${room} IP Address
       icon: mdi:ip-network
-
+  - platform: template
+    name: ${room} Uptime
+    id: room_uptime
+    icon: "mdi:timer-outline"
+    entity_category: diagnostic
+    
 binary_sensor:
   # status sensor
   - platform: status
@@ -191,3 +194,4 @@ number:
     restore_value: true
     unit_of_measurement: "lx"
     # mode: slider
+
