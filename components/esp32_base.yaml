@@ -14,7 +14,8 @@ logger:
   level: "${log_level}"
 
 ota:
-  
+  platform: esphome
+
 api:
   reboot_timeout: 5min
 
