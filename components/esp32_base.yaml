@@ -15,7 +15,7 @@ logger:
 
 ota:
   platform: esphome
-
+  
 api:
   reboot_timeout: 5min
 
@@ -49,7 +49,7 @@ uart:
 
 light:
   - platform: status_led
-    name: "ESP32 Status LED"
+    name: "$room Status LED"
     pin:
       number: GPIO32
       inverted: true
